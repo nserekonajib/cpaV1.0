@@ -2,50 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Course Upload</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div>
-        <img src="../static/l.png" alt="love" width="500px">
+    <img src="../static/l.png" alt="love" width="500px">
+    <div class="container">
+        
+        <form action="/submit" method="POST" enctype="multipart/form-data">
+            <label for="level">Level:</label>
+            <select name="level" id="level" required>
+                <option value="">Select Level</option>
+                <option value="1">Level I</option>
+                <option value="2">Level II</option>
+                <option value="3">Level III</option>
+                <option value="4">Level IV</option>
+            </select>
+
+            <label for="course_unit">Course Unit:</label>
+            <select name="course_unit" id="course_unit" required>
+                <option value="">Select Course Unit</option>
+            </select>
+
+            <label for="topic">Topic:</label>
+            <select name="topic" id="topic" required>
+                <option value="">Select Topic</option>
+            </select>
+
+            <label for="subtopic">Subtopic:</label>
+            <input type="text" name="subtopic" id="subtopic" placeholder="Enter Subtopic" required>
+
+            <label for="youtube_link">YouTube Video Link:</label>
+            <input type="url" name="youtube_link" id="youtube_link" placeholder="Enter YouTube Video Link" required>
+
+            <label for="thumbnail">Thumbnail:</label>
+            <input type="file" name="thumbnail" id="thumbnail" required>
+
+            <button type="submit">Upload</button>
+        </form>
     </div>
-    <form id="courseForm" action="/submit" method="post" enctype="multipart/form-data">
-        <label for="level">Select Level:</label>
-        <select id="level" name="level">
-            <option value="1">Level 1</option>
-            <option value="2">Level 2</option>
-            <option value="3">Level 3</option>
-            <option value="4">Level 4</option>
-            <option value="5">Level 5</option>
-        </select>
-        <br>
-        <label for="course_unit">Select Course Unit:</label>
-        <select id="course_unit" name="course_unit"></select>
-        <br>
-        <label for="thumbnail">Select Thumbnail:</label>
-        <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
-        <br>
-        <label for="video_link">YouTube Video Link:</label>
-        <input type="url" id="video_link" name="video_link">
-        <br>
-        <input type="submit" value="Submit">
-    </form>
 
     <script>
         $(document).ready(function() {
             $('#level').change(function() {
-                const level = $(this).val();
+                var level = $(this).val();
+                console.log('Level selected:', level);  // Debugging log
                 $.ajax({
                     url: '/get_course_units',
-                    type: 'POST',
+                    method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({ level: level }),
-                    success: function(course_units) {
+                    success: function(response) {
+                        console.log('Course units response:', response);  // Debugging log
                         $('#course_unit').empty();
-                        course_units.forEach(function(unit) {
-                            $('#course_unit').append(new Option(unit, unit));
+                        $('#course_unit').append('<option value="">Select Course Unit</option>');
+                        $.each(response, function(index, value) {
+                            $('#course_unit').append('<option value="' + index + '">' + index + '</option>');
                         });
+                    },
+                    error: function(error) {
+                        console.error('Error fetching course units:', error);  // Debugging log
+                    }
+                });
+            });
+
+            $('#course_unit').change(function() {
+                var level = $('#level').val();
+                var course_unit = $(this).val();
+                console.log('Course unit selected:', course_unit);  // Debugging log
+                $.ajax({
+                    url: '/get_topics',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ level: level, course_unit: course_unit }),
+                    success: function(response) {
+                        console.log('Topics response:', response);  // Debugging log
+                        $('#topic').empty();
+                        $('#topic').append('<option value="">Select Topic</option>');
+                        $.each(response, function(index, value) {
+                            $('#topic').append('<option value="' + value + '">' + value + '</option>');
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error fetching topics:', error);  // Debugging log
                     }
                 });
             });
