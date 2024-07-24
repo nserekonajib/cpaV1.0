@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Upload</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div>
+        <img src="../static/l.png" alt="love" width="500px">
+    </div>
+    <form id="courseForm" action="/submit" method="post" enctype="multipart/form-data">
+        <label for="level">Select Level:</label>
+        <select id="level" name="level">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+        </select>
+        <br>
+        <label for="course_unit">Select Course Unit:</label>
+        <select id="course_unit" name="course_unit"></select>
+        <br>
+        <label for="thumbnail">Select Thumbnail:</label>
+        <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
+        <br>
+        <label for="video_link">YouTube Video Link:</label>
+        <input type="url" id="video_link" name="video_link">
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            $('#level').change(function() {
+                const level = $(this).val();
+                $.ajax({
+                    url: '/get_course_units',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ level: level }),
+                    success: function(course_units) {
+                        $('#course_unit').empty();
+                        course_units.forEach(function(unit) {
+                            $('#course_unit').append(new Option(unit, unit));
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
